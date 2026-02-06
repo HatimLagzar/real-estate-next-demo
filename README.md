@@ -1,40 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Real Estate Frontend
 
-## Getting Started
+Next.js frontend for a real estate app. Handles authentication and property listings, talking to a Laravel API.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Next.js 16** (Pages Router)
+- **React 19**
+- **Tailwind CSS 4**
+- **Laravel API** (auth + properties)
+
+## Prerequisites
+
+- Node.js 18+
+- Laravel backend running (e.g. `http://localhost:8000`) with auth and properties API
+
+## Setup
+
+1. **Clone and install**
+
+   ```bash
+   npm install
+   ```
+
+2. **Environment**
+
+   Copy the example env and set your Laravel API URL:
+
+   ```bash
+   cp .env.local.example .env.local
+   ```
+
+   In `.env.local`:
+
+   ```env
+   NEXT_PUBLIC_API_URL=http://localhost:8000
+   ```
+
+   Use the URL of your Laravel app (no trailing slash).
+
+3. **Run**
+
+   ```bash
+   npm run dev
+   ```
+
+   App runs at [http://localhost:3000](http://localhost:3000).
+
+## Scripts
+
+| Command        | Description              |
+|----------------|--------------------------|
+| `npm run dev`  | Start dev server         |
+| `npm run build`| Build for production     |
+| `npm run start`| Start production server |
+
+## Features
+
+- **Auth**: Login and register; token stored in `localStorage`; cookie used for middleware.
+- **Middleware**: Protects `/properties` (and below). Unauthenticated users are redirected to `/login`. Logged-in users visiting `/login` or `/register` are redirected to `/properties`.
+- **Properties**: List (table), create, edit, delete. Create/update send `user_id` from the current user when available.
+- **Routing**: `/` redirects to `/properties`.
+
+## Project structure
+
+```
+src/
+├── components/
+│   └── PropertyForm.js    # Shared form for create/edit property
+├── lib/
+│   └── api.js            # API client, auth helpers, property CRUD
+├── middleware.js        # Auth protection and guest redirects
+├── pages/
+│   ├── _app.js
+│   ├── _document.js
+│   ├── login.js
+│   ├── register.js
+│   └── properties/
+│       ├── index.js      # List + delete
+│       ├── new.js       # Create
+│       └── [id]/
+│           └── edit.js  # Edit
+└── styles/
+    └── globals.css
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Laravel API expectations
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+- **Base URL**: `NEXT_PUBLIC_API_URL` (e.g. `http://localhost:8000`).
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+- **Auth**
+  - `POST /api/login` — body: `{ email, password }`. Response: `{ token, user?: { id, ... } }`.
+  - `POST /api/register` — body: `{ name, email, password, password_confirmation }`. Response: `{ token, user?: { id, ... } }`.
+  - Authenticated requests: `Authorization: Bearer <token>`.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
+- **Properties**
+  - `GET /api/properties` — list (array or `{ data: [] }`).
+  - `GET /api/properties/:id` — single (object or `{ data: {} }`).
+  - `POST /api/properties` — body: `property_type`, `features` (array), `price`, `taxes`, `income`, `expenditure`, `user_id` (sent by frontend when available).
+  - `PUT /api/properties/:id` — same body shape as create.
+  - `DELETE /api/properties/:id`.
 
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Property fields: `property_type` (residential | commercial | land), `features` (JSON array of strings), `price`, `taxes`, `income`, `expenditure`, `user_id`.
 
-## Learn More
+## License
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+Private.
