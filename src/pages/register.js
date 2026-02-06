@@ -20,7 +20,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await registerUser(name, email, password, passwordConfirmation);
-      router.push("/");
+      router.push(router.query.from && typeof router.query.from === "string" ? router.query.from : "/");
     } catch (err) {
       setError(err.message || "Registration failed");
       if (err.errors) setFieldErrors(err.errors);

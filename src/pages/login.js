@@ -18,7 +18,7 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(email, password);
-      router.push("/");
+      router.push(router.query.from && typeof router.query.from === "string" ? router.query.from : "/");
     } catch (err) {
       setError(err.message || "Login failed");
       if (err.errors) setFieldErrors(err.errors);
